@@ -1,4 +1,2 @@
 flask
-gevent
-pg8000
 psycopg2

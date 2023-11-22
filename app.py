@@ -1,16 +1,20 @@
 import sys
 
 from flask import Flask, request
-from gevent.pywsgi import WSGIServer
 import db
 
 app = Flask(__name__)
-database_op = db.DatabaseOp
+database_op = db.DatabaseOp()
 if database_op.connect():
     print("Successfully connected to database")
 else:
     print("Error when connecting to the database")
     sys.exit(0)
+
+
+@app.route('/')
+def index():
+    return 'Wrong Page'
 
 
 @app.route('/seller-signup')
@@ -29,12 +33,12 @@ def seller_login():
 
 
 @app.route('/buyer-signup')
-def seller_signup():
+def buyer_signup():
     return 'buyer-signup'
 
 
 @app.route('/buyer-login')
-def seller_login():
+def buyer_login():
     return 'buyer-login'
 
 
@@ -44,5 +48,4 @@ def admin_login():
 
 
 if __name__ == "__main__":
-    http_server = WSGIServer(('', 8080), app)
-    http_server.serve_forever()
+    app.run(port=8080)

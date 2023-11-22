@@ -13,12 +13,12 @@ else:
     sys.exit(0)
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return 'Wrong Page'
 
 
-@app.route('/seller-signup')
+@app.route('/seller-signup', methods=['POST'])
 def seller_signup():
     email = request.form.get('email')
     username = request.form.get('username')

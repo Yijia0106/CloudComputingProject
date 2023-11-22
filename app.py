@@ -15,12 +15,12 @@ else:
 
 @app.route('/seller-signup')
 def seller_signup():
-    email = request.form.get('startDate')
-    username = request.form.get('endDate')
-    password = request.form.get('endDate')
-
+    email = request.form.get('email')
+    username = request.form.get('username')
+    password = request.form.get('password')
 
     print(f'{email} + {username} + {password}')
+    database_op.insert_into_user_info('s', email, username, password)
 
 
 @app.route('/seller-login')

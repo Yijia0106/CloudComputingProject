@@ -1,5 +1,5 @@
 import sys
-
+import logging
 import psycopg2
 
 
@@ -15,6 +15,7 @@ conn_args = {
 class DatabaseOp:
     def __init__(self):
         self.conn = None
+        self.logger = logging.getLogger()
 
     def connect(self):
         try:
@@ -22,7 +23,7 @@ class DatabaseOp:
             self.conn = conn
             return True
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             return False
 
     def get_admin_info(self):
@@ -32,10 +33,9 @@ class DatabaseOp:
                            "FROM admin_data.user_cred_info "
                            "WHERE type = 'a'")
             res = cursor.fetchone()
-            print(res)
             return True
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             return False
 
     def insert_into_user_info(self, the_type, email, username, password):
@@ -47,5 +47,5 @@ class DatabaseOp:
             return True
 
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             return False

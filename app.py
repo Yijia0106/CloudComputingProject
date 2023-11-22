@@ -1,13 +1,15 @@
 import sys
 from flask import Flask, request
+import logging
 import db
 
+logger = logging.getLogger()
 app = Flask(__name__)
 database_op = db.DatabaseOp()
 if database_op.connect():
-    print("Successfully connected to database")
+    logger.info("Successfully connected to database")
 else:
-    print("Error when connecting to the database")
+    logger.error("Error when connecting to the database")
     sys.exit(0)
 
 
@@ -22,7 +24,7 @@ def seller_signup():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    print(f'{email} + {username} + {password}')
+    logger.info(f'{email} + {username} + {password}')
     database_op.insert_into_user_info('s', email, username, password)
 
 

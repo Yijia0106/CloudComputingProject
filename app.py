@@ -1,5 +1,4 @@
 import sys
-
 from flask import Flask, request
 import db
 
@@ -48,4 +47,4 @@ def admin_login():
 
 
 if __name__ == "__main__":
-    app.run(port=8080)
+    app.run(host='0.0.0.0', port=8080)

@@ -2,6 +2,7 @@ import sys
 
 import psycopg2
 
+
 conn_args = {
     'host': 'yj-db.c1p3vanozzul.us-east-1.rds.amazonaws.com',
     'user': 'postgres',

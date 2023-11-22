@@ -1,5 +1,5 @@
 import sys
-from flask import Flask, request
+from flask import Flask, request, make_response
 import logging
 import db
 
@@ -23,9 +23,12 @@ def seller_signup():
     email = request.form.get('email')
     username = request.form.get('username')
     password = request.form.get('password')
-
+    print(request.form)
     logger.info(f'{email} + {username} + {password}')
     database_op.insert_into_user_info('s', email, username, password)
+
+    response = make_response("<h1>Success</h1>", 201)
+    return response
 
 
 @app.route('/seller-login')

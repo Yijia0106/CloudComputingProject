@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+
 import boto3
 from flask import Flask, request, make_response, jsonify
 
@@ -20,7 +21,7 @@ else:
 
 @app.route('/', methods=['GET'])
 def index():
-    return 'Wrong Page'
+    return 'Welcome Page'
 
 
 @app.route('/signup', methods=['POST'])
@@ -46,7 +47,8 @@ def signup():
             'username': username,
             'identity': identity
         }
-        sns_client.publish(TopicArn='arn:aws:sns:us-east-1:876783651405:CloudComputingProject', Message=json.dumps(msg), Subject='New Registered User')
+        sns_client.publish(TopicArn='arn:aws:sns:us-east-1:876783651405:CloudComputingProject', Message=json.dumps(msg),
+                           Subject='New Registered User')
         logger.info("A new message got published to SNS")
 
     return response
@@ -87,6 +89,7 @@ def login():
 
 @app.route('/lookup_users', methods=['GET'])
 def lookup_users():
+    logger.info("New Look up request")
     identity_map = {'seller': 's',
                     'buyer': 'b',
                     'admin': 'a'}
@@ -104,11 +107,22 @@ def lookup_users():
     logger.info(f"The filtering condition is: {where_clause}")
     entries = database_op.select_from_user_info(where_clause)
     if not entries:
-        logger.error(f"This user does not exist!")
-        response = make_response("<h1>This user does not exist!</h1>", 200)
+        logger.error(f"Corresponding users do not exist!")
+        response = make_response("<h1>Corresponding users do not exist!</h1>", 200)
     else:
+        if 'per_page' in args:
+            per_page = int(args['per_page'])
+        else:
+            per_page = 2
+        if 'page' in args:
+            page = int(args['page'])
+        else:
+            page = 0
+        offset = (page - 1) * per_page
+        limit = per_page
+        new_entries = database_op.select_from_user_info_with_pagination(where_clause, offset, limit)
         res = []
-        for entry in entries:
+        for entry in new_entries:
             temp = {'username': entry[1],
                     'email': entry[2],
                     'user type': entry[4],
@@ -122,6 +136,7 @@ def lookup_users():
 
 @app.route('/update_user', methods=['PUT', 'DELETE'])
 def update_user():
+    logger.info(f"New update user request and the request type is {request.method}")
     payload = request.get_json()
     email = payload["email"]
     if request.method == 'PUT':
@@ -150,6 +165,7 @@ def update_user():
 
 @app.route('/update_transaction', methods=['POST'])
 def update_transaction():
+    logger.info("New update transaction request")
     if 'buyer_email' in request.form:
         buyer_email = request.form.get('buyer_email')
         seller_email = request.form.get('seller_email')

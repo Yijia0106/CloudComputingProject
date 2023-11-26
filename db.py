@@ -36,7 +36,7 @@ class DatabaseOp:
             return res
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def insert_into_user_info(self, the_type, email, username, password):
         cursor = self.conn.cursor()
@@ -49,7 +49,7 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def select_from_user_info_by_email(self, email, identity):
         cursor = self.conn.cursor()
@@ -65,7 +65,7 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def exit_gracefully(self):
         self.conn.commit()
@@ -84,27 +84,25 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def select_from_user_info(self, where_clause):
         cursor = self.conn.cursor()
         try:
             query = ("SELECT * FROM admin_data.user_cred_info WHERE '{}'".format(where_clause).replace("'", "")
                      .replace("**", "'"))
-            print(query)
             cursor.execute(query)
             res = cursor.fetchall()
             return res
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def update_user_status(self, email, change_to):
         cursor = self.conn.cursor()
         try:
             query = "UPDATE admin_data.user_cred_info SET is_blocked = '{}' WHERE email = '{}'"
-            print(query.format(change_to, email))
             cursor.execute(query.format(change_to, email))
             self.conn.commit()
             self.logger.info("A entry got updated in the admin_data.activities table")
@@ -112,13 +110,12 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def delete_a_user(self, email):
         cursor = self.conn.cursor()
         try:
             query = "DELETE FROM admin_data.user_cred_info WHERE email = '{}'"
-            print(query.format(email))
             cursor.execute(query.format(email))
             self.conn.commit()
             self.logger.info("A entry got deleted in the admin_data.activities table")
@@ -126,7 +123,7 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
 
     def insert_into_transaction(self, buyer_email, seller_email, product_id, product_name, price, quantity):
         cursor = self.conn.cursor()
@@ -139,4 +136,20 @@ class DatabaseOp:
 
         except Exception as e:
             self.logger.error(e)
-            self.exit_gracefully()
+            # self.exit_gracefully()
+
+    def select_from_user_info_with_pagination(self, where_clause, offset, limit):
+        cursor = self.conn.cursor()
+        try:
+            query = (
+                "SELECT * FROM admin_data.user_cred_info WHERE '{}' LIMIT '{}' OFFSET '{}'".format(where_clause, limit,
+                                                                                                   offset).replace("'",
+                                                                                                                   "")
+                .replace("**", "'"))
+            cursor.execute(query)
+            res = cursor.fetchall()
+            return res
+
+        except Exception as e:
+            self.logger.error(e)
+            # self.exit_gracefully()

@@ -51,14 +51,10 @@ class DatabaseOp:
             self.logger.error(e)
             # self.exit_gracefully()
 
-    def select_from_user_info_by_email(self, email, identity):
+    def select_from_user_info_by_email(self, email):
         cursor = self.conn.cursor()
         try:
-            if identity:
-                query = "SELECT * FROM admin_data.user_cred_info WHERE email = '{}' and type = '{}'".format(email,
-                                                                                                            identity)
-            else:
-                query = "SELECT * FROM admin_data.user_cred_info WHERE email = '{}'".format(email)
+            query = "SELECT * FROM admin_data.user_cred_info WHERE email = '{}'".format(email)
             cursor.execute(query)
             res = cursor.fetchall()
             return res
@@ -105,7 +101,7 @@ class DatabaseOp:
             query = "UPDATE admin_data.user_cred_info SET is_blocked = '{}' WHERE email = '{}'"
             cursor.execute(query.format(change_to, email))
             self.conn.commit()
-            self.logger.info("A entry got updated in the admin_data.activities table")
+            self.logger.info("A entry got updated in the admin_data.user_cred_info table")
             return True
 
         except Exception as e:
@@ -118,7 +114,7 @@ class DatabaseOp:
             query = "DELETE FROM admin_data.user_cred_info WHERE email = '{}'"
             cursor.execute(query.format(email))
             self.conn.commit()
-            self.logger.info("A entry got deleted in the admin_data.activities table")
+            self.logger.info("A entry got deleted in the admin_data.user_cred_info table")
             return True
 
         except Exception as e:

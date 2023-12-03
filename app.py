@@ -3,15 +3,17 @@ import logging
 import sys
 
 import boto3
-from flask import Flask, request, make_response, jsonify
+import requests
+from flask import Flask, request, make_response, jsonify, render_template
 
 import db
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
-app = Flask(__name__)
+app = Flask(__name__, template_folder='frontend')
 database_op = db.DatabaseOp()
 sns_client = boto3.client('sns', region_name='us-east-1')
+
 if database_op.connect():
     logger.info("Successfully connected to database")
 else:
@@ -24,36 +26,6 @@ def index():
     return 'Welcome Page'
 
 
-@app.route('/signup', methods=['POST'])
-def signup():
-    identity_map = {'seller': 's',
-                    'buyer': 'b'}
-    email = request.form.get('email')
-    username = request.form.get('username')
-    password = request.form.get('password')
-    identity = identity_map.get(request.form.get('identity'))
-    response = make_response("<h1>Success</h1>", 201)
-    logger.info(f"New signup request received for {identity}: {email}, {username} {password}")
-    # see if there is a duplicate entry
-    if database_op.select_from_user_info_by_email(email, identity):
-        # duplicate!
-        logger.error(f"Trying to sign up using a duplicate email address: {email}")
-        response = make_response("<h1>Failed due to duplicate email address</h1>", 201)
-    else:
-        # if no, insert a new entry
-        database_op.insert_into_user_info(identity, email, username, password)
-        msg = {
-            'email': email,
-            'username': username,
-            'identity': identity
-        }
-        sns_client.publish(TopicArn='arn:aws:sns:us-east-1:876783651405:CloudComputingProject', Message=json.dumps(msg),
-                           Subject='New Registered User')
-        logger.info("A new message got published to SNS")
-
-    return response
-
-
 @app.route('/login', methods=['POST'])
 def login():
     identity_map = {'seller': 's',
@@ -64,8 +36,8 @@ def login():
     password = request.form.get('password')
     identity = identity_map.get(request.form.get('identity'))
     response = make_response("<h1>Success</h1>", 201)
-    logger.info(f"New login request received for {identity}: {email}, {password}")
-    output = database_op.select_from_user_info_by_email(email, identity)
+    logger.info(f"New login request received for {identity}: {email}")
+    output = database_op.select_from_user_info_by_email(email)
 
     if not output:
         # No match record (email)
@@ -87,8 +59,8 @@ def login():
     return response
 
 
-@app.route('/lookup_users', methods=['GET'])
-def lookup_users():
+@app.route('/users', methods=['GET'])
+def get_users():
     logger.info("New Look up request")
     identity_map = {'seller': 's',
                     'buyer': 'b',
@@ -117,11 +89,13 @@ def lookup_users():
         if 'page' in args:
             page = int(args['page'])
         else:
-            page = 0
+            page = 1
         offset = (page - 1) * per_page
         limit = per_page
         new_entries = database_op.select_from_user_info_with_pagination(where_clause, offset, limit)
         res = []
+        if not new_entries:
+            return make_response("<h1>No users at this page!</h1>", 404)
         for entry in new_entries:
             temp = {'username': entry[1],
                     'email': entry[2],
@@ -134,12 +108,59 @@ def lookup_users():
     return response
 
 
-@app.route('/update_user', methods=['PUT', 'DELETE'])
-def update_user():
+@app.route('/users', methods=['POST'])
+def create_a_user():
+    identity_map = {'seller': 's',
+                    'buyer': 'b'}
+    email = request.form.get('email')
+    username = request.form.get('username')
+    password = request.form.get('password')
+    identity = identity_map.get(request.form.get('identity'))
+    response = make_response("<h1>Success</h1>", 201)
+    logger.info(f"New signup request received for {identity}: {email}, {username} {password}")
+    # see if there is a duplicate entry
+    if database_op.select_from_user_info_by_email(email):
+        # duplicate!
+        logger.error(f"Trying to sign up using a duplicate email address: {email}")
+        response = make_response("<h1>Failed due to duplicate email address</h1>", 201)
+    else:
+        # if no, insert a new entry
+        database_op.insert_into_user_info(identity, email, username, password)
+        msg = {
+            'email': email,
+            'username': username,
+            'identity': identity
+        }
+        sns_client.publish(TopicArn='arn:aws:sns:us-east-1:876783651405:CloudComputingProject', Message=json.dumps(msg),
+                           Subject='New Registered User')
+        logger.info("A new message got published to SNS")
+
+    return response
+
+
+@app.route('/users/<string:email>', methods=['GET'])
+def get_the_user(email):
+    logger.info("New get single user request received!")
+    output = database_op.select_from_user_info_by_email(email)
+    if not output:
+        response = ("<h1>User Not Found</h1>", 404)
+    else:
+        entry = output[0]
+        temp = {'username': entry[1],
+                'email': entry[2],
+                'user type': entry[4],
+                'status': entry[5],
+                'created timestamp': entry[6]}
+        response = make_response(jsonify(temp), 200)
+    return response
+
+
+@app.route('/users/<string:email>', methods=['PUT', 'DELETE'])
+def update_user(email):
     logger.info(f"New update user request and the request type is {request.method}")
-    payload = request.get_json()
-    email = payload["email"]
+    email = email
     if request.method == 'PUT':
+        payload = request.get_json()
         change_to = payload["change_to"]
         if database_op.update_user_status(email, change_to):
             logger.info(
@@ -188,6 +209,15 @@ def update_transaction():
     else:
         response = make_response("<h1>ERROR</h1>", 200)
         return response
+
+
+@app.route('/shall_i_buy_this', methods=['GET'])
+def decide():
+    logger.info("New decision begins")
+    response = json.loads(requests.get('https://yesno.wtf/api').content)
+    img = response['image']
+    print(img)
+    return render_template('decision.html', user_image=img)
 
 
 if __name__ == "__main__":

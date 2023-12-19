@@ -1,6 +1,5 @@
 import json
 import logging
-import sys
 from datetime import date
 
 import boto3
@@ -26,7 +25,6 @@ def index():
     return 'Welcome Page!'
 
 
-@app.route('/', methods=['GET'])
 @app.route('/greeting', methods=['GET'])
 def greeting():
     today = date.today()

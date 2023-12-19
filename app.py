@@ -19,7 +19,6 @@ if database_op.connect():
     logger.info("Successfully connected to database")
 else:
     logger.error("Error when connecting to the database")
-    sys.exit(0)
 
 
 @app.route('/index', methods=['GET'])

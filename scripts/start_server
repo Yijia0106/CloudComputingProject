@@ -1,7 +1,4 @@
 #!/bin/bash
+# shellcheck disable=SC2164
 cd /home/ec2-user/workspace/CloudComputingProject
-# nohup python3 app.py &
-sudo pkill -f python3
-screen -S letsSee
-sudp python3 app.py
-sudo Ctrl-A D
+nohup python3 app.py &

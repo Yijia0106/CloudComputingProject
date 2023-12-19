@@ -2,3 +2,4 @@ flask
 boto3
 requests
 pytest
+psycopg2-binary

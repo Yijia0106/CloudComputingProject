@@ -19,5 +19,5 @@ def test_users(app, client):
 
 
 def test_admin_user(app, client):
-    res = client.get('/jobs/yw3936@columbia.edu')
+    res = client.get('/users/yw3936@columbia.edu')
     assert res.status_code == 200

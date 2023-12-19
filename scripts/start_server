@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /home/ec2-user/workspace/CloudComputingProject
-pkill -f python3
+sudo pkill -f python3
 sudo nohup python3 app.py &

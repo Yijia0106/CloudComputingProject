@@ -1,3 +1,7 @@
 #!/bin/bash
 cd /home/ec2-user/workspace/CloudComputingProject
-nohup python3 app.py &
+# nohup python3 app.py &
+sudo pkill -f python3
+screen -S session_name
+python script.py
+Ctrl-A D

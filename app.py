@@ -22,7 +22,7 @@ else:
 
 @app.route('/index', methods=['GET'])
 def index():
-    return 'Welcome'
+    return 'Welcome No'
 
 
 @app.route('/greeting', methods=['GET'])

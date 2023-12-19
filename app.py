@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from datetime import date
 
 import boto3
 import requests
@@ -21,9 +22,16 @@ else:
     sys.exit(0)
 
 
-@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
 def index():
     return 'Welcome Page'
+
+
+@app.route('/', methods=['GET'])
+@app.route('/greeting', methods=['GET'])
+def greeting():
+    today = date.today()
+    return f"Today's date: {today}  >333  I Love you YaoYao"
 
 
 @app.route('/login', methods=['POST'])

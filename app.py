@@ -30,7 +30,7 @@ def index():
 @app.route('/greeting', methods=['GET'])
 def greeting():
     today = date.today()
-    return f"Today's date: {today}  >333  I Love you YaoYao"
+    return f"Today's date: {today}"
 
 
 @app.route('/login', methods=['POST'])

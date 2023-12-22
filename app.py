@@ -7,10 +7,12 @@ import requests
 from flask import Flask, request, make_response, jsonify, render_template
 
 import db
+import middleware
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__, template_folder='frontend')
+app.wsgi_app = middleware.SimpleMiddleWare(app.wsgi_app)
 database_op = db.DatabaseOp()
 sns_client = boto3.client('sns', region_name='us-east-1')
 
@@ -22,7 +24,7 @@ else:
 
 @app.route('/index', methods=['GET'])
 def index():
-    return 'Welcome No'
+    return 'Welcome Yes'
 
 
 @app.route('/greeting', methods=['GET'])
